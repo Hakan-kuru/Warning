@@ -2,8 +2,9 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="warning">
+      <SelectionState runConfigName="MyApplication">
         <option name="selectionMode" value="DROPDOWN" />
+<<<<<<< Updated upstream
       </SelectionState>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
@@ -11,6 +12,12 @@
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\ASUS\.android\avd\Pixel_9_2.avd" />
+=======
+        <DropdownSelection timestamp="2026-03-03T10:38:02.517406800Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=LMQ710U8YLDUSKAUEY" />
+>>>>>>> Stashed changes
             </handle>
           </Target>
         </DropdownSelection>

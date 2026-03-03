@@ -14,8 +14,17 @@ import com.example.warning.data.local.entity.ProfileEntity
     entities = [
         ProfileEntity::class,
         LinkedEntity::class,
+<<<<<<< Updated upstream
         ContactEntity::class],
     version = 5
+=======
+        ContactEntity::class,
+        IncomingEmergencyEntity::class,
+        OutgoingEmergencyEntity::class
+               ],
+    version = 8,
+    exportSchema = false
+>>>>>>> Stashed changes
 )
 @TypeConverters()
 abstract class AppDatabase : RoomDatabase() {

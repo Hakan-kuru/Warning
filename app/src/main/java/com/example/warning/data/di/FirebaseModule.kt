@@ -11,6 +11,7 @@ import com.example.warning.data.repository.FirebaseRepositoryImpl
 import com.example.warning.domain.repository.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,14 +25,41 @@ object FirebaseModule {
 
     @Provides
     @Singleton
+<<<<<<< Updated upstream
     fun provideFirebaseAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
+=======
+    fun provideFirebaseAuth():
+            FirebaseAuth {
+        val auth = FirebaseAuth.getInstance()
+        if (BuildConfig.DEBUG) {
+//            auth.useEmulator("10.0.2.2", 9099)
+//            auth.firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
+        }
+        return auth
+>>>>>>> Stashed changes
     }
 
     @Provides
     @Singleton
+<<<<<<< Updated upstream
     fun provideFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
+=======
+    fun provideFirebaseFunctions(): FirebaseFunctions {
+        return FirebaseFunctions.getInstance("europe-west1")
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore():
+            FirebaseFirestore {
+        val firestore = FirebaseFirestore.getInstance()
+        if (BuildConfig.DEBUG) {
+//            firestore.useEmulator("10.0.2.2", 8080)
+        }
+        return firestore
+>>>>>>> Stashed changes
     }
 
     @Provides

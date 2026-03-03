@@ -14,7 +14,7 @@ data class ContactEntity(
     var name: String?,                                           //      *
     val country: String,                                        //          *
     val phone: String,    // İletişim kişisinin numarası           //              *      owner ekleyen kişi - mmesaj gönderecek olan
-                              //              *      default eklenen kişi - kime gidecek
+
     var specielMessage: String?= null,                          //          *
     var isLocationSend: Boolean = false,                        //      *
     var tag: String? = null,                                    //  *
@@ -23,5 +23,4 @@ data class ContactEntity(
     var isConfirmed: Boolean,
     var addedId: String?,
     var addingId: String?
-//*
 )

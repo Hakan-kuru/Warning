@@ -63,7 +63,45 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideProfileUseCases(repository: ProfileRepository, firebaseRepo: FirebaseRepository): ProfileUseCases {
+    fun provideProfileUseCases(
+        repository: ProfileRepository,
+        firebaseRepo: FirebaseRepository)
+    : ProfileUseCases {
         return ProfileUseCases(repository, firebaseRepo)
     }
+<<<<<<< Updated upstream
+=======
+
+    @Provides
+    @Singleton
+    fun provideEmergencyRepository(
+        functions: FirebaseFunctions
+    ): EmergencyRepository {
+        return EmergencyRepositoryImpl(
+            functions
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmergencyApi(retrofit: Retrofit): EmergencyApi {
+        return retrofit.create(EmergencyApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmergencyHistoryRepository(
+        emergencyHistoryDao: EmergencyHistoryDao
+    ): EmergencyHistoryRepository {
+        return EmergencyHistoryRepositoryImpl(emergencyHistoryDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideThemeRepository(
+        @ApplicationContext context: Context
+    ): com.example.warning.domain.repository.ThemeRepository {
+        return com.example.warning.data.repository.ThemeRepositoryImpl(context)
+    }
+>>>>>>> Stashed changes
 }

@@ -77,12 +77,193 @@ fun SignInScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+<<<<<<< Updated upstream
         when (step) {
             VerificationStep.EnterPhone -> {
                 // 🔽 Ülke kodu seçimi
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
+=======
+        // Animated Icon
+        Box(
+            modifier = Modifier.size(80.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .graphicsLayer { rotationZ = rotation }
+                    .background(
+                        Brush.sweepGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.primary,
+                            )
+                        ),
+                        CircleShape
+                    )
+            )
+
+            Surface(
+                modifier = Modifier.size(72.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                tonalElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Login,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = "Hoş Geldiniz",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = "Hesabınıza giriş yapın",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EnterPhoneContent(
+    state: SignInUiState,
+    onExpandedChange: (Boolean) -> Unit,
+    onCountrySelected: (String) -> Unit,
+    onPhoneNumberChange: (String) -> Unit,
+    onRequestCodeClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Text(
+            text = "Telefon Numaranız",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            // Başlığın kartın üst sınırına çok yapışmaması için margin eklendi
+            modifier = Modifier
+                .padding(top = 8.dp)
+
+        )
+
+        Text(
+            text = "SMS ile doğrulama kodu göndereceğiz.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        // Country Code Dropdown
+        PremiumCountryDropdown(
+            selectedCode = state.selectedCountryCode,
+            expanded = state.expanded,
+            onExpandedChange = onExpandedChange,
+            onCountrySelected = onCountrySelected
+        )
+
+        // Phone Number Input
+        PremiumPhoneInput(
+            phone = state.phoneNumber,
+            onPhoneChange = onPhoneNumberChange
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Submit Button
+        PremiumButton(
+            text = "Kod Gönder",
+            icon = Icons.Default.Send,
+            onClick = onRequestCodeClick,
+            enabled = state.phoneNumber.length >= 10
+        )
+    }
+}
+
+@Composable
+private fun EnterCodeContent(
+    state: SignInUiState,
+    onSmsCodeChange: (String) -> Unit,
+    onVerifyClick: () -> Unit,
+    onResendClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        // Success Icon
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                tonalElevation = 4.dp
+            ) {
+                Icon(
+                    Icons.Default.MarkEmailRead,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.padding(16.dp).size(32.dp)
+                )
+            }
+        }
+
+        Text(
+            text = "Kod Gönderildi",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Text(
+            text = "Telefonunuza gelen 6 haneli kodu girin",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // SMS Code Input
+        PremiumCodeInput(
+            code = state.smsCode,
+            onCodeChange = onSmsCodeChange
+        )
+
+        // Timer or Resend
+        if (state.timeLeft > 0) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+>>>>>>> Stashed changes
                 ) {
                     OutlinedTextField(
                         value = selectedCountryCode,
