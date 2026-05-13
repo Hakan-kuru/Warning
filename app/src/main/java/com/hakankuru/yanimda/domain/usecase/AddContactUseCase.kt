@@ -50,7 +50,7 @@ class AddContactUseCase @Inject constructor(
             id = "", // Firestore tarafı id oluşturacak
             phone = phone,
             country = country,
-            name = "waiting request",
+            name = "Bekleyen İstek",
             profilePhoto = null,
             ownerProfilePhoto = owner.profilePhoto,
             ownerPhone = owner.phoneNumber,

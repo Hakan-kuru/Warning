@@ -309,4 +309,49 @@ class FirestoreService(
             false
         }
     }
+
+    /**
+     * Kullanıcının hesabını tamamen siler:
+     * 1) Firestore'daki profil belgesi
+     * 2) Kullanıcının oluşturduğu tüm contacts (ownerPhone)
+     * 3) Kullanıcının dahil olduğu tüm contacts (phone)
+     */
+    suspend fun deleteAccount(userId: String, phoneNumber: String): Boolean {
+        return try {
+            // 1) Profil belgesini sil
+            firestore.collection("profiles")
+                .document(userId)
+                .delete()
+                .await()
+            Log.i("ServiceDeleteAccount", "Profil silindi: $userId")
+
+            // 2) Kullanıcının oluşturduğu contacts'ları sil (ownerPhone)
+            val ownedContacts = firestore.collection("contacts")
+                .whereEqualTo("ownerPhone", phoneNumber)
+                .get()
+                .await()
+            for (doc in ownedContacts.documents) {
+                doc.reference.delete().await()
+            }
+            Log.i("ServiceDeleteAccount", "${ownedContacts.size()} owned contact silindi")
+
+            // 3) Kullanıcının phone olarak geçtiği contacts'ları sil
+            val linkedContacts = firestore.collection("contacts")
+                .whereEqualTo("phone", phoneNumber)
+                .get()
+                .await()
+            for (doc in linkedContacts.documents) {
+                doc.reference.delete().await()
+            }
+            Log.i("ServiceDeleteAccount", "${linkedContacts.size()} linked contact silindi")
+
+            true
+        } catch (e: CancellationException) {
+            Log.w("ServiceDeleteAccount", "Coroutine iptal edildi")
+            throw e
+        } catch (e: Exception) {
+            Log.e("ServiceDeleteAccount", "Hesap silme hatası: ${e.message}", e)
+            false
+        }
+    }
 }

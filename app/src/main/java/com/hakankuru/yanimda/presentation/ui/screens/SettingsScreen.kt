@@ -30,16 +30,20 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hakankuru.yanimda.presentation.viewModel.SettingsViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onDeleteAccount: () -> Unit = {}
 ) {
     val isDarkTheme by viewModel.isDarkTheme.collectAsState(initial = false)
+    val isDeleteAccountLoading by viewModel.isDeleteAccountLoading.collectAsState()
     val context = LocalContext.current
 
     var hasLocationPermission by remember {
@@ -227,6 +231,21 @@ fun SettingsScreen(
                 PremiumLogoutButton(
                     onClick = { viewModel.logout(onLogout) }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Delete Account Button
+                PremiumDeleteAccountButton(
+                    isLoading = isDeleteAccountLoading,
+                    onConfirm = {
+                        viewModel.deleteAccount(
+                            onDeleted = onDeleteAccount,
+                            onError = { /* Hata UI'da diyalog içinde gösteriliyor */ }
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -639,6 +658,186 @@ private fun PremiumLogoutButton(onClick: () -> Unit) {
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
                     Text("İptal")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun PremiumDeleteAccountButton(
+    isLoading: Boolean,
+    onConfirm: () -> Unit
+) {
+    var pressed by remember { mutableStateOf(false) }
+    var showFirstDialog by remember { mutableStateOf(false) }
+    var showFinalDialog by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.95f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+    )
+
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        pressed = true
+                        tryAwaitRelease()
+                        pressed = false
+                    },
+                    onTap = { if (!isLoading) showFirstDialog = true }
+                )
+            },
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 8.dp
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF8B0000).copy(alpha = 0.85f),
+                            Color(0xFF4A0000).copy(alpha = 0.85f)
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Row(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Text(
+                        text = "Hesabı Sil",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+
+    // İlk onay diyaloğu
+    if (showFirstDialog) {
+        AlertDialog(
+            onDismissRequest = { showFirstDialog = false },
+            icon = {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF8B0000).copy(alpha = 0.15f)
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFF8B0000),
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    "Hesabı Sil",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            },
+            text = {
+                Text(
+                    "Bu işlem geri alınamaz. Profiliniz, bağlantılarınız ve tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinize emin misiniz?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showFirstDialog = false
+                        showFinalDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8B0000)
+                    )
+                ) {
+                    Text("Evet, Sil")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFirstDialog = false }) {
+                    Text("İptal")
+                }
+            }
+        )
+    }
+
+    // Son onay diyaloğu (ikinci güvenlik katmanı)
+    if (showFinalDialog) {
+        AlertDialog(
+            onDismissRequest = { showFinalDialog = false },
+            icon = {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF8B0000).copy(alpha = 0.15f)
+                ) {
+                    Icon(
+                        Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = Color(0xFF8B0000),
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    "Son Onay",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            },
+            text = {
+                Text(
+                    "Hesabınız ve tüm verileriniz kalıcı olarak silinecek. Bu işlemi onaylıyor musunuz?",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showFinalDialog = false
+                        onConfirm()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8B0000)
+                    )
+                ) {
+                    Text("Hesabı Kalıcı Olarak Sil")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFinalDialog = false }) {
+                    Text("Vazgeç")
                 }
             }
         )

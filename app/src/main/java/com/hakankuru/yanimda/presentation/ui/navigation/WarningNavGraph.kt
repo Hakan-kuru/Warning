@@ -1,7 +1,11 @@
 package com.hakankuru.yanimda.presentation.ui.navigation
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +23,8 @@ import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
+import com.hakankuru.yanimda.data.local.ContactsReader
+import com.hakankuru.yanimda.presentation.ui.components.ContactPickerBottomSheet
 import com.hakankuru.yanimda.presentation.ui.screens.MainScreen
 import com.hakankuru.yanimda.domain.usecase.AddContactResult
 import com.hakankuru.yanimda.domain.usecase.ContactActionResult
@@ -36,6 +43,7 @@ import com.hakankuru.yanimda.presentation.viewModel.VerificationStep
 import com.hakankuru.yanimda.presentation.viewModel.VerificationViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun WarningNavGraph(
@@ -197,8 +205,15 @@ fun WarningNavGraph(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 onLogout = {
+                    // ✅ FIX: Logout sonrası SignIn'e yönlendir, back stack'i temizle
                     navController.navigate(Routes.SIGN_IN) {
-                        popUpTo(0)
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onDeleteAccount = {
+                    // Hesap silme sonrası da SignIn'e yönlendir
+                    navController.navigate(Routes.SIGN_IN) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -281,12 +296,36 @@ fun WarningNavGraph(
             var phone by remember { mutableStateOf("") }
             var isDropdownExpanded by remember { mutableStateOf(false) }
 
+            // ──── Rehber İzni + BottomSheet State ────
+            var showContactPicker by remember { mutableStateOf(false) }
+            var showPermissionDialog by remember { mutableStateOf(false) }
+            var deviceContacts by remember { mutableStateOf(listOf<com.hakankuru.yanimda.domain.model.PhoneContact>()) }
+            var isContactsLoading by remember { mutableStateOf(false) }
+
+            // İzin launcher: kullanıcı izni verirse/reddederse
+            val contactsPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                if (isGranted) {
+                    // İzin verildi → rehberi oku ve BottomSheet aç
+                    scope.launch {
+                        isContactsLoading = true
+                        showContactPicker = true
+                        deviceContacts = ContactsReader.readContacts(context)
+                        isContactsLoading = false
+                    }
+                } else {
+                    Toast.makeText(context, "Rehber erişimi reddedildi", Toast.LENGTH_SHORT).show()
+                }
+            }
+
             // AddContactResult akışını merkezi dinle ve Toast göster
             LaunchedEffect(Unit) {
                 contactViewModel.addContactState.collect { state ->
                     when (state) {
                         is AddContactResult.Success -> {
                             Toast.makeText(context, "Kişi eklendi", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
                         }
                         is AddContactResult.Error -> {
                             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
@@ -337,9 +376,44 @@ fun WarningNavGraph(
                             ).show()
                         }
                     }
+                },
+                onPickFromContacts = {
+                    // İzin var mı kontrol et
+                    val hasPermission = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_CONTACTS
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (hasPermission) {
+                        // İzin zaten var → doğrudan oku ve aç
+                        scope.launch {
+                            isContactsLoading = true
+                            showContactPicker = true
+                            deviceContacts = ContactsReader.readContacts(context)
+                            isContactsLoading = false
+                        }
+                    } else {
+                        // İzin yok → iste
+                        contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                    }
                 }
             )
+
+            // Rehber BottomSheet
+            if (showContactPicker) {
+                ContactPickerBottomSheet(
+                    contacts = deviceContacts,
+                    isLoading = isContactsLoading,
+                    onContactSelected = { selected ->
+                        // Seçilen kişinin numarasını ve ülke kodunu state'e aktar
+                        phone = selected.phoneNumber
+                        country = selected.countryCode
+                    },
+                    onDismiss = { showContactPicker = false }
+                )
+            }
         }
+
 
         // Acil Durum Geçmişi
         composable(

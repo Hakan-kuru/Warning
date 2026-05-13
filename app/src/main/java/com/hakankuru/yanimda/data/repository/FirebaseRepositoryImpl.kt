@@ -42,6 +42,18 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteAccount(userId: String, phoneNumber: String): Boolean {
+        return try {
+            firestoreService.deleteAccount(userId, phoneNumber)
+        } catch (e: CancellationException) {
+            Log.w("Firebase Service", "Coroutine iptal edildi: $e")
+            throw e
+        } catch (e: Exception) {
+            Log.w("Firebase Service", "deleteAccount hata: ${e}")
+            false
+        }
+    }
+
     override suspend fun getUser(phone: String): UserDto?{
         return firestoreService.getProfile(phone)
     }

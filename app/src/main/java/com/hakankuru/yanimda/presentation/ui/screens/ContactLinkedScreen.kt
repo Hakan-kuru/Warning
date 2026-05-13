@@ -366,6 +366,8 @@ private fun PremiumContactCard(
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
     )
 
+    val displayName = if (contact.name == "waiting request") "Bekleyen İstek" else contact.name
+
     GlassCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -404,7 +406,7 @@ private fun PremiumContactCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = contact.name.take(1).uppercase(),
+                    text = displayName.take(1).uppercase(),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -418,7 +420,7 @@ private fun PremiumContactCard(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = contact.name,
+                        text = displayName,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
@@ -497,7 +499,7 @@ private fun PremiumContactCard(
                         onDismissRequest = { expanded = false }
                     ) {
                         Text(
-                            text = "${contact.name}",
+                            text = displayName,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.titleSmall.copy(
                                 fontWeight = FontWeight.Bold
@@ -542,7 +544,7 @@ private fun PremiumContactCard(
     if (showDialog) {
         PremiumDeleteDialog(
             title = "Kişiyi Kaldır",
-            message = "${contact.name} kişisini bağlantılardan kaldırmak istediğinize emin misiniz?",
+            message = "$displayName kişisini bağlantılardan kaldırmak istediğinize emin misiniz?",
             onConfirm = { showDialog = false; onDelete() },
             onDismiss = { showDialog = false }
         )
@@ -564,6 +566,8 @@ private fun PremiumLinkedCard(
         targetValue = if (pressed) 0.98f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
     )
+
+    val displayName = if (linked.name == "waiting request") "Bekleyen İstek" else linked.name
 
     GlassCard(
         modifier = Modifier
@@ -634,7 +638,7 @@ private fun PremiumLinkedCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = linked.name,
+                            text = displayName,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.SemiBold
                             ),
@@ -704,7 +708,7 @@ private fun PremiumLinkedCard(
                             onDismissRequest = { expanded = false }
                         ) {
                             Text(
-                                text = linked.name,
+                                text = displayName,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontWeight = FontWeight.Bold
@@ -743,7 +747,7 @@ private fun PremiumLinkedCard(
     if (showDialog) {
         PremiumDeleteDialog(
             title = "Bağlantıyı Kaldır",
-            message = "${linked.name} ile bağlantınızı kaldırmak istediğinize emin misiniz?",
+            message = "$displayName ile bağlantınızı kaldırmak istediğinize emin misiniz?",
             onConfirm = { showDialog = false; onDelete() },
             onDismiss = { showDialog = false }
         )

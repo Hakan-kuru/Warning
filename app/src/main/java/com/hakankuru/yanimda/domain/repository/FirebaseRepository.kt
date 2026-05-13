@@ -26,6 +26,11 @@ interface FirebaseRepository {
      */
     suspend fun updateFCMToken(userId: String, token: String): Boolean
 
+    /**
+     * Kullanıcının tüm Firestore verilerini (profil + contacts) siler
+     */
+    suspend fun deleteAccount(userId: String, phoneNumber: String): Boolean
+
     // Linked actions (operate on contact doc id viewed as linked)
     suspend fun confirmLinked(
         contactId: String,
