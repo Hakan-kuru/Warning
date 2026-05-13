@@ -29,6 +29,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+//migrations
+import com.hakankuru.yanimda.data.MIGRATION_2
+import com.hakankuru.yanimda.data.MIGRATION_2_3
+import com.hakankuru.yanimda.data.MIGRATION_3_4
+import com.hakankuru.yanimda.data.MIGRATION_4_5
+import com.hakankuru.yanimda.data.MIGRATION_5_6
+import com.hakankuru.yanimda.data.MIGRATION_6_7
+import com.hakankuru.yanimda.data.MIGRATION_7_8
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,7 +54,7 @@ object AppModule {
                 appContext,
                 AppDatabase::class.java,
                 "profile_database"
-            ).fallbackToDestructiveMigration(true)
+            )
             .build()
     }
 
